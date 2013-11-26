@@ -102,23 +102,23 @@ function Game() {
 
 // dealer will be players[0], "Player1" will be players[1], ect. 
 Game.prototype.populatePlayers = function(numPlayers) {
-	players.push(new Player("Dealer"));
+	this.players.push(new Player("Dealer"));
 	var wantNames = confirm("Do you want to enter names for players? Just hit cancel to get player numbers.");
 	if (wantNames) {
 		for (var i=1; i<=numPlayers; i++) {
 			var chosenName = prompt("Player" + i + ", what's your name?");
-			players.push(new Player(chosenName));
+			this.players.push(new Player(chosenName));
 		}
 	}
 	else {
 		for (var j=1; j<=numPlayers; j++) {
-			players.push(new player("Player" + j));
+			this.players.push(new player("Player" + j));
 		}
 	}   
 };
 
 Game.prototype.dealOneCard = function(player) {
-	player.cardsHeld.push(deck.shift());
+	player.cardsHeld.push(this.deck.cards.shift());
 };
 
 Game.prototype.dealTwoCards = function(player) {
@@ -128,10 +128,10 @@ Game.prototype.dealTwoCards = function(player) {
 
 // card game rules say deal to players first, then dealer.
 Game.prototype.dealToEveryone = function() {
-	for (var i=1; i<=numPlayers; i++) {
-		this.dealTwoCards(players[i]);
+	for (var i = 1; i <= numPlayers; i++) {
+		this.dealTwoCards(this.players[i]);
 	}
-	this.dealTwoCards(players[0]);
+	this.dealTwoCards(this.players[0]);
 };
 
 Game.prototype.printAndAlert = function(message) {
@@ -176,8 +176,8 @@ Game.prototype.playerTurn = function(activePlayer) {
 
 Game.prototype.areAllBust = function() {
 	var allBust = true;
-	for (var i=1; i<players.length; i++) {
-		if (players[i].isBust === false) {
+	for (var i = 1; i < this.players.length; i++) {
+		if (this.players[i].isBust === false) {
 			allBust = false;
 			break;
 		}
@@ -187,55 +187,55 @@ Game.prototype.areAllBust = function() {
 
 Game.prototype.dealerTurn = function() {
 	alert("Dealer's turn.");
-	this.printAndAlertInitialCardsAndScore(players[0]);
-	while (players[0].playerScore() <=17) {
+	this.printAndAlertInitialCardsAndScore(this.players[0]);
+	while (this.players[0].playerScore() <=17) {
 		console.log("Dealer will hit.");
-		this.hit(players[0]);
+		this.hit(this.players[0]);
 	}
 	console.log("Dealer will stand.");
 };
 
 Game.prototype.calcWinners = function() {
-	this.winners =[];
+	this.winners = [];
 	this.players.sort(function(a,b) {return b.playerScore() - a.playerScore();});
-	for (var i=0; i<players.length; i++) {
+	for (var i = 0; i < this.players.length; i++) {
 		if (this.players[i].isBust === false) {
-			this.winners.push(players[i]);
+			this.winners.push(this.players[i]);
 			break;
 		}
 	}
 	for (var j = 0; j < this.players.length; j++){
 		if (this.players[j].playerName !== this.winners[0].playerName && this.players[j].playerScore() === this.winners[0].playerScore()) {
-			this.winners.push(players[j]);
+			this.winners.push(this.players[j]);
 		}
 	}
 };
 
 Game.prototype.announceWinners = function() {
 	var winnerNames = [];
-	for (var i=0; i<winners.length; i++) {
+	for (var i = 0; i < this.winners.length; i++) {
 		winnerNames.push(this.winners[i].playerName);
 	}
 	winnerNames = winnerNames.join(", and ");
-	printAndAlert(winnerNames + ", you win! with a score of " + winners[0].playerScore() + ".");
+	this.printAndAlert(winnerNames + ", you win! with a score of " + this.winners[0].playerScore() + ".");
 };
 
 Game.prototype.oneRound = function() {
-	this.deck.shuffleDeck();
+	this.deck.shuffle();
 	
 	numPlayers = prompt("How many players will there be? (or how many hands would you like?)");
 	numPlayers = parseInt(numPlayers);
 
-	populatePlayers(numPlayers);
+	this.populatePlayers(numPlayers);
 	this.dealToEveryone();
 
-	this.printAndAlertInitialCardsAndScore(players[0]);
+	this.printAndAlertInitialCardsAndScore(this.players[0]);
 
 	for (var i=1; i<= numPlayers; i++) {
-		this.playerTurn(players[i]);
+		this.playerTurn(this.players[i]);
 	}
 
-	if (areAllBust() === false) {
+	if (this.areAllBust() === false) {
 		this.dealerTurn();
 	}
 
@@ -244,7 +244,7 @@ Game.prototype.oneRound = function() {
 };
 
 Game.prototype.gatherCards = function() {
-	for (var i=0; i<players.length; i++) {
+	for (var i = 0; i < this.players.length; i++) {
 		while (this.players[i].cardsHeld.length > 0) {
 			this.deck.cards.push(this.players[i].cardsHeld.shift());
 		}
