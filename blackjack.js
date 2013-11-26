@@ -96,12 +96,12 @@ Player.prototype.playerScore = function() {
 
 // game
 function Game() {
-  this.players = [];
   this.deck = new Deck();
 }
 
 // dealer will be players[0], "Player1" will be players[1], ect. 
 Game.prototype.populatePlayers = function(numPlayers) {
+  this.players = [];
 	this.players.push(new Player("Dealer"));
 	var wantNames = confirm("Do you want to enter names for players? Just hit cancel to get player numbers.");
 	if (wantNames) {
@@ -112,7 +112,7 @@ Game.prototype.populatePlayers = function(numPlayers) {
 	}
 	else {
 		for (var j=1; j<=numPlayers; j++) {
-			this.players.push(new player("Player" + j));
+			this.players.push(new Player("Player" + j));
 		}
 	}   
 };
