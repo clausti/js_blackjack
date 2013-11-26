@@ -251,19 +251,23 @@ Game.prototype.gatherCards = function() {
 	}
 };
 
+Game.prototype.play = function() {
+
+  var wantPlay = confirm("Are you ready to play?");
+  while (wantPlay) {
+  	this..oneRound();
+  	wantPlay = confirm("Do you want to play again?");
+  	if (wantPlay) {
+  		this.gatherCards();
+  		this.deck.resetAces();
+  	}
+  }
+}
+
 //gameplay
 
 var blackjack = new Game();
 
-var wantPlay = confirm("Are you ready to play?");
-
-while (wantPlay) {
-	blackjack.oneRound();
-	wantPlay = confirm("Do you want to play again?");
-	if (wantPlay) {
-		blackjack.gatherCards();
-		blackjack.deck.resetAces();
-	}
-}
+blackjack.play();
 
 console.log("The End.");
