@@ -1,9 +1,6 @@
 //functions and variables
 
-deck = [];
-var numPlayers;
-var players = [];
-
+//
 function Card(cardName, cardScore, isAce) {
 	this.cardName = cardName;
 	this.cardScore = cardScore;
@@ -21,32 +18,41 @@ Card.prototype.oneToEleven = function() {
 	this.isAce = true;
 };
 
+//
+function Deck() {
+  this.populateDeck();
+}
 
-var faceCards = ["Jack", "Queen", "King"]; 
-var populateSuite = function(suite) {
-	for (var i= 2; i<=10; i++) {
-		deck.push(new Card(i + " of " + suite, i, false));
+Deck.faceCards = ["Jack", "Queen", "King"];
+Deck.suites = ["Clubs", "Diamonds", "Hearts", "Spades"];
+
+Deck.prototype.populateSuite = function(suite) {
+  cards = [];
+	for (var i = 2; i <= 10; i++) {
+		cards.push(new Card(i + " of " + suite, i, false));
 	}
-	for (var j=0; j<faceCards.length; j++) {
-		deck.push(new Card(faceCards[j] + " of " + suite, 10, false));
+	for (var j = 0; j < Deck.faceCards.length; j++) {
+		cards.push(new Card(Deck.faceCards[j] + " of " + suite, 10, false));
 	}
-	deck.push(new Card("Ace of " + suite, 11, true));
+	cards.push(new Card("Ace of " + suite, 11, true));
+  return cards;
 };
 
-var suites = ["Clubs", "Diamonds", "Hearts", "Spades"];
-var populateDeck = function() {
-	for (var i=0; i<suites.length; i++) {
-		populateSuite(suites[i]);
+Deck.prototype.populateDeck = function() {
+  this.cards = [];
+	for (var i = 0; i < Deck.suites.length; i++) {
+		this.cards = this.cards.concat(this.populateSuite(Deck.suites[i]));
 	}
 };
 
-var shuffleDeck = function() {
-	for (var i=0; i<deck.length; i++) {
-		deck[i].sortValue = Math.random();
+Deck.prototype.shuffle = function() {
+	for (var i = 0; i < this.cards.length; i++) {
+		this.cards[i].sortValue = Math.random();
 	}	
-	deck.sort( function(a,b) {return a.sortValue - b.sortValue;} );
+	this.cards.sort( function(a,b) {return a.sortValue - b.sortValue;} );
 };
 
+//
 function Player(playerName) {
 	this.playerName = playerName;
 	this.cardsHeld = [];
@@ -63,7 +69,8 @@ Player.prototype.addUpCardScores = function() {
 
 Player.prototype.playerScore = function() {
 	var score = this.addUpCardScores();
-	while (score>21 && this.isBust===false) {
+  
+	while (score > 21 && this.isBust === false) {
 		for (var i=0; i< this.cardsHeld.length; i++) {
 			if (this.cardsHeld[i].isAce) {
 				this.cardsHeld[i].elevenToOne();
@@ -73,16 +80,20 @@ Player.prototype.playerScore = function() {
 			}
 			else {
 				this.isBust = true;
-			}
-              
+			}    
 		}
 	}
 	return score;
 };
 
+//
+function Game() {
+  this.players = [];
+  this.deck = new Deck();
+}
+
 // dealer will be players[0], "Player1" will be players[1], ect. 
-var populatePlayers = function(numPlayers) {
-	players = [];
+Game.prototype.populatePlayers = function(numPlayers) {
 	players.push(new Player("Dealer"));
 	var wantNames = confirm("Do you want to enter names for players? Just hit cancel to get player numbers.");
 	if (wantNames) {
