@@ -1,6 +1,6 @@
 //functions and variables
 
-//
+// card
 function Card(cardName, cardScore, isAce) {
 	this.cardName = cardName;
 	this.cardScore = cardScore;
@@ -18,7 +18,7 @@ Card.prototype.oneToEleven = function() {
 	this.isAce = true;
 };
 
-//
+// deck
 function Deck() {
   this.populateDeck();
 }
@@ -52,7 +52,15 @@ Deck.prototype.shuffle = function() {
 	this.cards.sort( function(a,b) {return a.sortValue - b.sortValue;} );
 };
 
-//
+Deck.prototype.resetAces = function() {
+	for (var i = 0; i < this.cards.length; i++) {
+		if (this.cards[i].cardScore === 1) {
+			this.cards[i].oneToEleven();
+		}
+	}
+};
+
+// player
 function Player(playerName) {
 	this.playerName = playerName;
 	this.cardsHeld = [];
@@ -86,7 +94,7 @@ Player.prototype.playerScore = function() {
 	return score;
 };
 
-//
+// game
 function Game() {
   this.players = [];
   this.deck = new Deck();
@@ -109,64 +117,64 @@ Game.prototype.populatePlayers = function(numPlayers) {
 	}   
 };
 
-var dealOneCard = function(whereDealt) {
-	whereDealt.push(deck.shift());
+Game.prototype.dealOneCard = function(player) {
+	player.cardsHeld.push(deck.shift());
 };
 
-var dealTwoCards = function(whereDealt) {
-	whereDealt.push(deck.shift());
-	whereDealt.push(deck.shift());
+Game.prototype.dealTwoCards = function(player) {
+	this.dealOneCard(player);
+	this.dealOneCard(player);
 };
 
 // card game rules say deal to players first, then dealer.
-var dealToEveryone = function() {
+Game.prototype.dealToEveryone = function() {
 	for (var i=1; i<=numPlayers; i++) {
-		dealTwoCards(players[i].cardsHeld);
+		this.dealTwoCards(players[i]);
 	}
-	dealTwoCards(players[0].cardsHeld);
+	this.dealTwoCards(players[0]);
 };
 
-var printAndAlert = function(message) {
+Game.prototype.printAndAlert = function(message) {
 	console.log(message);
 	alert(message);
 };
 
-var printAndAlertInitialCardsAndScore = function(activePlayer) {
-	printAndAlert(activePlayer.playerName + ", your cards are the " + activePlayer.cardsHeld[0].cardName + " and the " + activePlayer.cardsHeld[1].cardName + ". Your initial score is " + activePlayer.playerScore() + ".");
+Game.prototype.printAndAlertInitialCardsAndScore = function(activePlayer) {
+	this.printAndAlert(activePlayer.playerName + ", your cards are the " + activePlayer.cardsHeld[0].cardName + " and the " + activePlayer.cardsHeld[1].cardName + ". Your initial score is " + activePlayer.playerScore() + ".");
 };
 
-var playerWantsHit;
-var hitConfirm = function(activePlayer) {
-	playerWantsHit = confirm(activePlayer.playerName + ", Do you want to hit?");
-	return playerWantsHit;
+Game.prototype.hitConfirm = function(activePlayer) {
+	var wantsHit = confirm(activePlayer.playerName + ", Do you want to hit?");
+	return wantsHit;
 };
 
-var hit = function(activePlayer) {
-	dealOneCard(activePlayer.cardsHeld);
+Game.prototype.hit = function(activePlayer) {
+	this.dealOneCard(activePlayer);
 	if (activePlayer.playerScore() > 21) {
-		printAndAlert( activePlayer.playerName + ", your new card is the " + activePlayer.cardsHeld[activePlayer.cardsHeld.length-1].cardName + ", and your new score is " + activePlayer.playerScore() + ". (" + " (You are bust.)");
+		this.printAndAlert( activePlayer.playerName + ", your new card is the " + activePlayer.cardsHeld[activePlayer.cardsHeld.length-1].cardName + ", and your new score is " + activePlayer.playerScore() + ". (" + " (You are bust.)");
 	}
 	else {
-		printAndAlert( activePlayer.playerName + ", your new card is the " + activePlayer.cardsHeld[activePlayer.cardsHeld.length-1].cardName + ", and your new score is " + activePlayer.playerScore() + ".");
+		this.printAndAlert( activePlayer.playerName + ", your new card is the " + activePlayer.cardsHeld[activePlayer.cardsHeld.length-1].cardName + ", and your new score is " + activePlayer.playerScore() + ".");
 	}
 };
 
-var playerTurn = function(activePlayer) {
-	printAndAlertInitialCardsAndScore(activePlayer);
-	hitConfirm(activePlayer);
+Game.prototype.playerTurn = function(activePlayer) {
+	this.printAndAlertInitialCardsAndScore(activePlayer);
+	var playerWantsHit = this.hitConfirm(activePlayer);
+  
 	while (playerWantsHit && !activePlayer.isBust) {
 		console.log(activePlayer.playerName + " will hit.");
-		hit(activePlayer);
+		this.hit(activePlayer);
 		if (activePlayer.playerScore()<21) {
-			hitConfirm(activePlayer);
+			playerWantsHit = this.hitConfirm(activePlayer);
 		}
 	}
 	if (!activePlayer.isBust) {
-		printAndAlert(activePlayer.playerName + " will stand."); 
+		this.printAndAlert(activePlayer.playerName + " will stand."); 
 	}
 };
 
-var areAllBust = function() {
+Game.prototype.areAllBust = function() {
 	var allBust = true;
 	for (var i=1; i<players.length; i++) {
 		if (players[i].isBust === false) {
@@ -177,93 +185,84 @@ var areAllBust = function() {
 	return allBust;
 };
 
-var dealerTurn = function() {
+Game.prototype.dealerTurn = function() {
 	alert("Dealer's turn.");
-	printAndAlertInitialCardsAndScore(players[0]);
+	this.printAndAlertInitialCardsAndScore(players[0]);
 	while (players[0].playerScore() <=17) {
 		console.log("Dealer will hit.");
-		hit(players[0]);
+		this.hit(players[0]);
 	}
 	console.log("Dealer will stand.");
 };
 
-var winners;
-var calcWinners = function() {
-	winners =[];
-	players.sort(function(a,b) {return b.playerScore() - a.playerScore();});
+Game.prototype.calcWinners = function() {
+	this.winners =[];
+	this.players.sort(function(a,b) {return b.playerScore() - a.playerScore();});
 	for (var i=0; i<players.length; i++) {
-		if (players[i].isBust === false) {
-			winners.push(players[i]);
+		if (this.players[i].isBust === false) {
+			this.winners.push(players[i]);
 			break;
 		}
 	}
-	for (var j=0; j<players.length; j++){
-		if (players[j].playerName !== winners[0].playerName && players[j].playerScore() === winners[0].playerScore()) {
-			winners.push(players[j]);
+	for (var j = 0; j < this.players.length; j++){
+		if (this.players[j].playerName !== this.winners[0].playerName && this.players[j].playerScore() === this.winners[0].playerScore()) {
+			this.winners.push(players[j]);
 		}
 	}
 };
 
-var announceWinners = function() {
+Game.prototype.announceWinners = function() {
 	var winnerNames = [];
 	for (var i=0; i<winners.length; i++) {
-		winnerNames.push(winners[i].playerName);
+		winnerNames.push(this.winners[i].playerName);
 	}
 	winnerNames = winnerNames.join(", and ");
 	printAndAlert(winnerNames + ", you win! with a score of " + winners[0].playerScore() + ".");
 };
 
-var oneRound = function() {
-	shuffleDeck();
+Game.prototype.oneRound = function() {
+	this.deck.shuffleDeck();
 	
 	numPlayers = prompt("How many players will there be? (or how many hands would you like?)");
 	numPlayers = parseInt(numPlayers);
 
 	populatePlayers(numPlayers);
-	dealToEveryone();
+	this.dealToEveryone();
 
-	printAndAlertInitialCardsAndScore(players[0]);
+	this.printAndAlertInitialCardsAndScore(players[0]);
 
 	for (var i=1; i<= numPlayers; i++) {
-		playerTurn(players[i]);
+		this.playerTurn(players[i]);
 	}
 
 	if (areAllBust() === false) {
-		dealerTurn();
+		this.dealerTurn();
 	}
 
-	calcWinners();
-	announceWinners();
+	this.calcWinners();
+	this.announceWinners();
 };
 
-var gatherCards = function() {
+Game.prototype.gatherCards = function() {
 	for (var i=0; i<players.length; i++) {
-		while (players[i].cardsHeld.length>0) {
-			deck.push(players[i].cardsHeld.shift());
-		}
-	}
-};
-
-var resetAces = function() {
-	for (var i=0; i<deck.length; i++) {
-		if (deck[i].cardScore === 1) {
-			deck[i].oneToEleven();
+		while (this.players[i].cardsHeld.length > 0) {
+			this.deck.cards.push(this.players[i].cardsHeld.shift());
 		}
 	}
 };
 
 //gameplay
 
-populateDeck();
+var blackjack = new Game();
 
 var wantPlay = confirm("Are you ready to play?");
 
 while (wantPlay) {
-	oneRound();
+	blackjack.oneRound();
 	wantPlay = confirm("Do you want to play again?");
 	if (wantPlay) {
-		gatherCards();
-		resetAces();
+		blackjack.gatherCards();
+		blackjack.deck.resetAces();
 	}
 }
 
