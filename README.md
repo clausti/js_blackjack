@@ -1,0 +1,1 @@
+Cleaning up a blackjack game I wrote in Javascript this spring, to make it more object-oriented. 
